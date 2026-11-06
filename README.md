@@ -62,3 +62,9 @@ Next.js 16, React 19, strict TypeScript, Tailwind 4, a shadcn/ui-compatible Butt
 No production origin or hosting is configured. Canonicals, sitemap and absolute social images should be added when an authorized production domain exists. No deployment was performed in Phase 00.
 
 Read [engineering rules](AGENTS.md), [product](docs/PRODUCT.md), [architecture](docs/ARCHITECTURE.md), [design system](docs/DESIGN_SYSTEM.md) and [API conventions](docs/API_CONTRACTS.md) before feature work. Future work should validate provider contracts first, then implement independent calendar, championship and race-result features. ECharts, GSAP, Lenis, TanStack Query, Zod and FastF1 are intentionally deferred.
+
+## Multi-agent development (Phase 00.5)
+
+Project-scoped Codex configuration and eight agent definitions live in `.codex/`. Start with the [agent workflow](docs/AGENT_WORKFLOW.md), [ownership/workstreams](docs/WORKSTREAMS.md), [independent review process](docs/REVIEW_PROCESS.md) and [validation record](docs/AGENT_VALIDATION.md).
+
+Reuse the [feature](prompts/feature.md), [review](prompts/review.md), [integration](prompts/integration.md) and [status](prompts/status.md) prompts in a new session rooted in this repository. Native subagents share the checkout by default; independent long-running sessions need explicitly assigned feature worktrees. Contracts precede parallel implementation. Reviews do not authorize Git merges or deployment. No application feature or provider integration is added in Phase 00.5.

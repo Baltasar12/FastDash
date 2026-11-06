@@ -1,5 +1,7 @@
 # SECTOR engineering rules
 
+SECTOR is a free, public, independent Formula 1 analytics project. Preserve Foundation and the approved phase; the Product Owner decides scope, major architecture changes and release approval.
+
 ## Scope and architecture
 
 - Read `docs/PRODUCT.md` and `docs/ARCHITECTURE.md` before feature work. Keep changes within the requested phase.
@@ -30,6 +32,7 @@
 
 - Clearly identify sample data at the point of display. Never blend samples with real results, imply a live feed, or present unknown values as zero.
 - Provider responses belong behind server-side adapters and runtime validation. Do not invent external schemas. Follow `docs/API_CONTRACTS.md`.
+- Verify official provider terms, redistribution rights, attribution, coverage and quotas before integrations; public accessibility is not permission to redistribute.
 - Preserve source, units, timestamp, session context and missing-data meaning. Distinguish provisional, unavailable and final results.
 - Never use unlicensed photographs, official logos or team branding. Maintain the independent-project notice.
 
@@ -49,3 +52,12 @@
 - Work on a feature branch or worktree; never modify `main` directly when isolated.
 - Do not reset, force push, delete branches or discard user changes without explicit authorization. Do not commit or push unless requested.
 - Never commit credentials, `.env` files, generated builds, browser reports or test artifacts. Only expose intentionally public environment variables with `NEXT_PUBLIC_`.
+
+## Agent coordination and integration
+
+- Before implementation, read relevant product, architecture, design and API documentation, then [agent workflow](docs/AGENT_WORKFLOW.md), [ownership/workstreams](docs/WORKSTREAMS.md) and [review process](docs/REVIEW_PROCESS.md).
+- The main session orchestrates. Delegate genuinely independent substantial tasks to specialized native subagents with explicit file ownership, acceptance criteria and a common baseline; normally at most three active implementers. Keep trivial work local and dependent work sequential. Agree shared contracts first.
+- Native subagents share the checkout unless explicitly isolated. Separate long-running sessions use feature branches/worktrees and explicit handoffs; they are not automatically supervised. Never allow simultaneous ownership of a file; serialize shared tokens, contracts and configuration.
+- For substantial work, obtain fresh independent code, UX and security/QA/performance reviews of the same frozen diff. Reviewers do not edit files or review their own changes. Their instructions do not enforce a read-only sandbox; respect inherited permissions and report enforcement limits.
+- Consolidate evidence, preserve dissent, fix confirmed defects and re-review corrections. Critical/High findings block readiness unless explicitly accepted by the user with reasons. A review PASS never authorizes integration or release.
+- Inspect branch/detached state, status and worktrees before integration. Never delete a worktree containing unintegrated work. Obtain explicit user approval before any merge, push, main modification or deployment; do not commit unless requested. Prepare a concrete diff and validation report first.
