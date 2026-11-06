@@ -45,9 +45,9 @@ Any status can carry a blocker. A failed required validation prevents approval; 
 
 ## Phase 00.6 contract baseline
 
-Contract revision: `F1_CONTRACT_VERSION = 1` (see [API_CONTRACTS.md](API_CONTRACTS.md)). Preparation baseline: `59953485c21bf818d2aef7ccde369f561b37c69e`. The Phase 00.6 candidate is uncommitted in `codex/phase-00-6-shared-contracts`; a branch name or that baseline SHA does not contain these new contracts. See [CONTRACTS_HANDOFF.md](CONTRACTS_HANDOFF.md) and the frozen review evidence before starting separate sessions. No future feature stream is started here.
+Contract revision: `F1_CONTRACT_VERSION = 1` (see [API_CONTRACTS.md](API_CONTRACTS.md)). Historical preparation baseline: `59953485c21bf818d2aef7ccde369f561b37c69e`. Introduction commit: `0aab47098bd629446afb945d3aef7cf281b11b49`. Contract status: **INTEGRATED** through [PR #2](https://github.com/Baltasar12/FastDash/pull/2) at `a72c5cb8adcc54343dd1e9dea68c0ec336879df2` on `main`. The original frozen review record and manifest are archived in that PR description; their pre-commit statements describe history, not current integration status.
 
-After user-authorized commit and validation, the coordinator must replace the pending contract commit in each task record with the same full SHA. Until then these planned streams remain BACKLOG with a baseline-distribution dependency; technical contract readiness is distinct from Git integration approval.
+The final common development baseline is selected only after this documentation update is merged and the resulting candidate from `main` is validated. Follow the exact selection and recording procedure in [CONTRACTS_HANDOFF.md](CONTRACTS_HANDOFF.md). Each task record must distinguish the contract integration SHA above from the same coordinator-selected development baseline SHA. These planned streams remain BACKLOG until that baseline is distributed and their scope, exclusive ownership and acceptance criteria are approved. No Data Layer, Overview or Race Center work has started.
 
 ## Exclusive ownership matrix
 
@@ -62,8 +62,8 @@ An owner owns only the task's assigned files, not an entire role's potential rem
 
 ## Dependencies and integration order
 
-1. Complete Phase 00.6 validation and tribunal. The Product Owner separately authorizes any contract commit/integration. Record the resulting full contract SHA in all three task records.
-2. Approve each feature's bounded scope and UI specifications. Create task records with exact disjoint paths and common baseline, then mark READY. For separate long-running sessions use distinct feature branches/worktrees from that SHA and `pnpm install --frozen-lockfile`.
+1. Phase 00.6 validation, tribunal and contract integration are complete. After explicit approval and merge of this documentation update, select, validate and record the final common development baseline using [CONTRACTS_HANDOFF.md](CONTRACTS_HANDOFF.md). Do not confuse the contract introduction commit with that final baseline.
+2. Approve each feature's bounded scope and UI specifications. Create task records with exact disjoint paths, contract integration SHA and the same final development baseline, then mark READY. For separate long-running sessions use distinct feature branches/worktrees from the recorded baseline and `pnpm install --frozen-lockfile`.
 3. A, B and C can then develop independently. B/C depend on contracts and fixture provider, not on A's implementation. No automatic production fixture fallback. A alone resolves provider payload validation and legal/coverage prerequisites; unverified publication rights remain a release blocker for real data.
 4. Validate and review each stream. Recommended assembly order: A provider, B Overview, C Race Center; coordinator serializes provider injection, route composition and navigation. Feature commits must never assume another unintegrated branch's files exist. Resolve shared contract changes before further dependent work.
 5. Freeze the combined candidate, repeat tribunal and integration checks. Obtain explicit approval before any merge, push, main modification or deployment. Readiness is not permission.

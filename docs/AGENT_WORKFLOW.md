@@ -46,7 +46,7 @@ Custom agents cannot impose a separate sandbox or approval policy. Review instru
 
 Before starting, inspect `git status --short`, `git branch --show-current`, `git rev-parse HEAD` and `git worktree list --porcelain`. An empty branch name can mean detached HEAD. Preserve dirty/untracked work and stop dependent operations rather than stashing/resetting it automatically.
 
-Choose a full validated baseline SHA containing required contracts and this infrastructure. Uncommitted configuration does not appear in new worktrees: ask the user to authorize a commit when needed. Do not assume `main` exists (Foundation currently has a feature branch only). Then run the following PowerShell example **only when starting an assigned stream**, with real values and unused target/branch names:
+Choose a full validated baseline SHA containing required contracts and this infrastructure. Uncommitted configuration does not appear in new worktrees: ask the user to authorize a commit when needed. Inspect the actual target branch; Phase 00.6 contracts are integrated into `main`, and [CONTRACTS_HANDOFF.md](CONTRACTS_HANDOFF.md) defines how to select the final common development baseline. Then run the following PowerShell example **only when starting an assigned stream**, with real values and unused target/branch names:
 
 ```powershell
 $baseline = '<validated-full-commit-sha>'
