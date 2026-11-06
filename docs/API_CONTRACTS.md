@@ -27,3 +27,11 @@ Handle timeouts, cancellation, rate limiting and bounded retries in the server d
 ## Optional Python/FastF1 boundary
 
 If needed later, use a versioned interface to a separate optional Python runtime. Validate returned artifacts like every other provider, document sampling and computation provenance, and keep the standard Next.js development environment independent of Python.
+
+## Parallel development handoff
+
+Before dependent work starts, assign one contract owner and record the baseline, exported symbols, consumer expectations, units, provenance, missing/error semantics and compatibility policy in the task record described in [WORKSTREAMS.md](WORKSTREAMS.md). Shared canonical contracts belong in `src/types/`, shared runtime boundaries in `src/schemas/`, provider wire schemas beside `src/data/providers/` adapters, and feature-only types inside their feature.
+
+Agree typed, provider-independent consumer interfaces after verifying real provider semantics. Frontend consumers use these stable interfaces through server queries or serializable view models; they never import raw provider responses or adapter internals. Contract changes require owner/consumer coordination before dependent edits resume. Keep adapters and UI separate as described in [ARCHITECTURE.md](ARCHITECTURE.md).
+
+For unfinished integrations, use deterministic, permitted mock fixtures behind the agreed interface. Label illustrative fixtures as samples at display and in tests; do not describe them as verified provider payloads. Fixtures are never a silent production fallback. Record assumptions and unavailable coverage explicitly. This phase adds no concrete domain models, external schemas or endpoints.
