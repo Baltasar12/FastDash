@@ -44,6 +44,7 @@
 
 ## Git and secrets
 
+- Always use Conventional Commits: `<type>[optional scope][!]: <description>`. Choose a meaningful type such as `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `build`, `ci`, `perf` or `style`; identify breaking changes with `!` or a `BREAKING CHANGE:` footer.
 - Inspect status and existing instructions before editing. Preserve unrelated work.
 - Work on a feature branch or worktree; never modify `main` directly when isolated.
 - Do not reset, force push, delete branches or discard user changes without explicit authorization. Do not commit or push unless requested.
