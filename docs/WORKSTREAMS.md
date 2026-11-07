@@ -69,3 +69,7 @@ An owner owns only the task's assigned files, not an entire role's potential rem
 5. Freeze the combined candidate, repeat tribunal and integration checks. Obtain explicit approval before any merge, push, main modification or deployment. Readiness is not permission.
 
 Acceptance across all streams: strict shared types, meaningful data/edge-state tests, no raw provider responses in UI, visible sample/provenance/freshness, unknown values never zero, no unauthorized branding, all required checks pass. UI streams additionally verify 320px/tablet/desktop, keyboard/touch, focus, reduced motion and native scroll; route/interaction changes require Playwright against a fresh production build.
+
+## Phase 03 telemetry workstreams
+
+03A coordinator owns src/types/telemetry*.ts, dedicated contract tests, src/data/fixtures/telemetry/** and telemetry documentation only. Preparation baseline c886687a0070bfc9770f51464cde64b091291c01; branch codex/phase03-telemetry-contracts. Implementer delegation is bounded to fixtures and dedicated tests; shared types have one coordinator writer. Future 03B owns src/data/providers/openf1/**, future 03C owns src/features/telemetry-lab/**. Both are BACKLOG until the same approved contract baseline is distributed. Routes, provider composition, shared contracts/fixtures, globals and cross-feature tests remain coordinator-owned. Exact acceptance and exclusions are in [TELEMETRY_HANDOFF.md](TELEMETRY_HANDOFF.md). No public route activation or competing providers.
