@@ -6,7 +6,9 @@ import { getPlatformModule, platformModules } from "@/config/navigation";
 
 export const dynamicParams = false;
 export function generateStaticParams() {
-  return platformModules.map(({ slug }) => ({ section: slug }));
+  return platformModules
+    .filter(({ slug }) => slug !== "race-center")
+    .map(({ slug }) => ({ section: slug }));
 }
 
 type PageProps = { params: Promise<{ section: string }> };
