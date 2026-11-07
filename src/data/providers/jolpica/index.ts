@@ -8,6 +8,7 @@ import type {
   Season,
 } from "@/types/f1";
 import type {
+  DataError,
   DataResult,
   EventRequest,
   F1DataProvider,
@@ -63,6 +64,25 @@ type Outcome<T> =
         | "not-covered"
         | "cancelled";
     };
+
+type LoadedOutcome<T> = Outcome<T> & {
+  /** A projection must retain the freshness of its actual source dataset. */
+  evidenceMetadata?: ResponseMetadata & { expiresAt: string };
+};
+
+function cacheKey(
+  operation: string,
+  query: SeasonRequest | EventRequest | undefined,
+): string {
+  const fields =
+    query === undefined
+      ? ""
+      : Object.entries(query)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
+          .join("&");
+  return `sector:f1:v1:jolpica:${operation}:${fields}`;
+}
 
 function option(
   value: number | undefined,
@@ -144,7 +164,20 @@ export function createJolpicaProvider(
   });
   // Bound retained normalized data across all seven independently typed caches.
   const retained = new Map<string, { bytes: number; evict: () => void }>();
+  // Failures never replace datasets or receive dataset freshness metadata.
+  const failures = new Map<
+    string,
+    { result: Extract<DataResult<never>, { status: "error" }>; until: number }
+  >();
   let retainedBytes = 0;
+
+  function touch(key: string) {
+    const entry = retained.get(key);
+    if (entry) {
+      retained.delete(key);
+      retained.set(key, entry);
+    }
+  }
 
   function forget(key: string) {
     const entry = retained.get(key);
@@ -155,7 +188,9 @@ export function createJolpicaProvider(
     }
   }
 
-  function failure<T>(error: ProviderFailure): DataResult<T> {
+  function failure(
+    error: ProviderFailure,
+  ): Extract<DataResult<never>, { status: "error" }> {
     return freeze({
       status: "error",
       error: error.detail,
@@ -183,14 +218,14 @@ export function createJolpicaProvider(
     operation: string,
     ttl: number,
     staleCeiling: number,
-    loader: (query: Q) => Promise<Outcome<T>>,
+    loader: (query: Q) => Promise<LoadedOutcome<T>>,
   ) {
     const cache = new Map<
       string,
       { result: Exclude<DataResult<T>, { status: "error" }>; expires: number }
     >();
     const inflight = new Map<string, Promise<DataResult<T>>>();
-    return async (query: Q): Promise<DataResult<T>> => {
+    const load = async (query: Q): Promise<DataResult<T>> => {
       const requiresEvent =
         operation === "event-details" ||
         operation === "results" ||
@@ -217,24 +252,40 @@ export function createJolpicaProvider(
           requiresEvent && "round" in query ? { round: query.round } : {},
         );
       }
-      const fields =
-        query === undefined
-          ? ""
-          : Object.entries(query)
-              .sort(([a], [b]) => a.localeCompare(b))
-              .map(
-                ([key, value]) => `${key}=${encodeURIComponent(String(value))}`,
-              )
-              .join("&");
-      const key = `sector:f1:v1:jolpica:${operation}:${fields}`;
+      const key = cacheKey(operation, query);
       const previous = cache.get(key);
-      if (previous && previous.expires > now())
+      if (previous && previous.expires > now()) {
+        touch(key);
         return freeze({
           ...previous.result,
           metadata: { ...previous.result.metadata, cache: "hit" },
         });
+      }
       const pending = inflight.get(key);
       if (pending) return pending;
+
+      function degraded(error: DataError): DataResult<T> | undefined {
+        if (
+          previous?.result.status === "success" &&
+          now() < previous.expires + staleCeiling
+        ) {
+          touch(key);
+          return freeze({
+            ...previous.result,
+            metadata: {
+              ...previous.result.metadata,
+              cache: "hit",
+              freshness: "stale",
+              revalidationError: error,
+            },
+          });
+        }
+      }
+
+      const suppressed = failures.get(key);
+      if (suppressed && suppressed.until > now())
+        return degraded(suppressed.result.error) ?? suppressed.result;
+      failures.delete(key);
       if (inflight.size >= 64)
         return failure(
           new ProviderFailure({
@@ -246,11 +297,13 @@ export function createJolpicaProvider(
       const work = (async (): Promise<DataResult<T>> => {
         try {
           const outcome = await loader(query);
+          failures.delete(key);
           const effectiveTtl = outcome.status === "success" ? ttl : 30_000;
+          const { evidenceMetadata, ...dataset } = outcome;
           const result = freeze({
-            ...outcome,
+            ...dataset,
             metadata: {
-              ...metadata(effectiveTtl),
+              ...(evidenceMetadata ?? metadata(effectiveTtl)),
               ...(outcome.status === "success" || outcome.status === "empty"
                 ? {}
                 : { completeness: "unknown" as const }),
@@ -282,21 +335,14 @@ export function createJolpicaProvider(
           return result;
         } catch (error) {
           if (!(error instanceof ProviderFailure)) throw error;
-          if (
-            previous?.result.status === "success" &&
-            now() < previous.expires + staleCeiling
-          ) {
-            return freeze({
-              ...previous.result,
-              metadata: {
-                ...previous.result.metadata,
-                cache: "hit",
-                freshness: "stale",
-                revalidationError: error.detail,
-              },
-            });
+          const result = failure(error);
+          while (failures.size >= 128) {
+            const oldest = failures.keys().next().value;
+            if (oldest === undefined) break;
+            failures.delete(oldest);
           }
-          return failure(error);
+          failures.set(key, { result, until: now() + 5_000 });
+          return degraded(error.detail) ?? result;
         } finally {
           inflight.delete(key);
         }
@@ -304,6 +350,23 @@ export function createJolpicaProvider(
       inflight.set(key, work);
       return work;
     };
+    return Object.assign(load, {
+      /** Reuse only work already requested; never initiate speculative fetches. */
+      peek(query: Q): Promise<DataResult<T>> | undefined {
+        const key = cacheKey(operation, query);
+        const entry = cache.get(key);
+        if (entry && entry.expires > now()) {
+          touch(key);
+          return Promise.resolve(
+            freeze({
+              ...entry.result,
+              metadata: { ...entry.result.metadata, cache: "hit" },
+            }),
+          );
+        }
+        return inflight.get(key);
+      },
+    });
   }
 
   async function collect<T>(
@@ -405,6 +468,30 @@ export function createJolpicaProvider(
     HOUR,
     24 * HOUR,
     async (query) => {
+      const pendingCalendar = getSeasonCalendar.peek({ season: query.season });
+      if (pendingCalendar) {
+        const calendar = await pendingCalendar;
+        if (
+          calendar.status === "success" &&
+          calendar.metadata.freshness === "fresh" &&
+          calendar.metadata.expiresAt !== undefined &&
+          Date.parse(calendar.metadata.expiresAt) > now()
+        ) {
+          const found = calendar.data.find(
+            (item) => item.round === query.round,
+          );
+          if (found)
+            return {
+              status: "success",
+              data: found,
+              evidenceMetadata: {
+                ...calendar.metadata,
+                expiresAt: calendar.metadata.expiresAt,
+                cache: "hit",
+              },
+            };
+        }
+      }
       const rows = await collect(
         `${query.season}/${query.round}/races`,
         (root) => {
@@ -558,12 +645,14 @@ export function createJolpicaProvider(
 
   return Object.freeze({
     getSupportedSeasons: () => getSupportedSeasons(undefined),
-    getSeasonCalendar,
-    getDriverStandings,
-    getConstructorStandings,
-    getEventDetails,
-    getRaceResults,
-    getQualifyingResults,
+    getSeasonCalendar: (request: SeasonRequest) => getSeasonCalendar(request),
+    getDriverStandings: (request: SeasonRequest) => getDriverStandings(request),
+    getConstructorStandings: (request: SeasonRequest) =>
+      getConstructorStandings(request),
+    getEventDetails: (request: EventRequest) => getEventDetails(request),
+    getRaceResults: (request: EventRequest) => getRaceResults(request),
+    getQualifyingResults: (request: EventRequest) =>
+      getQualifyingResults(request),
   });
 }
 

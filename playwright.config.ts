@@ -3,6 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: true,
+  workers: process.env.CI ? 2 : undefined,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: "list",
@@ -18,7 +19,10 @@ export default defineConfig({
     command: "pnpm start --hostname 127.0.0.1 --port 3107",
     url: "http://127.0.0.1:3107",
     reuseExistingServer: false,
-    env: { NODE_OPTIONS: "--import ./tests/e2e/mock-jolpica.mjs" },
+    env: {
+      SECTOR_E2E: "1",
+      NODE_OPTIONS: "--import ./tests/e2e/mock-jolpica.mjs",
+    },
     timeout: 60000,
   },
 });
