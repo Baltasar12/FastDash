@@ -36,24 +36,29 @@ pnpm build
 pnpm test:e2e
 ```
 
-Playwright starts/stops a production server automatically on port 3000. Stop an existing dev server before running it so it tests the intended build. Browser screenshots and failure traces are written to ignored `test-results/`.
+Playwright starts/stops a fresh production server on port 3107 and refuses to reuse an existing server. Its child process alone preloads `tests/e2e/mock-jolpica.mjs` to intercept Jolpica requests with deterministic synthetic wire responses. Normal `pnpm start` and `pnpm dev` use the real server adapter; they never load this test transport or substitute sample data after failures. Browser screenshots and failure traces are written to ignored `test-results/`.
 
 ## Project structure
 
 ```text
 src/app/                  App Router, global styling and metadata
 src/components/{ui,layout} Reusable primitives and shell
-src/features/overview/    Landing and illustrative analytics
+src/features/overview/    Preserved landing specimen and season dashboard
+src/features/race-center/ Event/session results explorer
 src/config/               Typed navigation/module configuration
-src/data/providers/       Future server adapter boundary
-src/{types,schemas}/      Future shared domain and runtime validation
+src/data/providers/       Server-only Jolpica adapter and application composition
+src/{types,schemas}/      Shared F1 v1 contracts and runtime validation boundary
 src/{lib,hooks}/          Shared utilities and future hooks
 src/tests/                Unit-test setup
 tests/e2e/                Production browser smoke tests
 docs/                     Product and engineering documentation
 ```
 
-Routes: `/`, `/calendar`, `/championship`, `/race-center`, `/telemetry-lab`. The four module routes are intentional placeholders. Unknown paths return a custom 404.
+Routes: `/` retains the editorial landing; `/overview` shows season calendar context, standings and recent published race results; `/race-center` explores event, reported sessions and available race/qualifying datasets. Calendar, Championship and Telemetry Lab remain placeholders. Unknown paths return a custom 404.
+
+Share URLs such as `/overview?season=2026` and `/race-center?season=2026&round=1&session=qualifying`. Repeated or invalid selectors are rejected. A qualifying dataset can exist without a reported calendar session; the explorer identifies this distinction without inventing a schedule. Date-based Overview selection says “Next on calendar” when session status is unknown. Recent-result discovery checks at most three relevant events and stops on operational failure.
+
+Source, retrieval time, stale/partial/publication context and Jolpica attribution remain visible. No live feed is promised. The bounded cache and quota are process-local; coordinated public-hosting quota management, license/usage review and Product Owner approval remain publication gates. See [Phase 01D evidence](docs/PHASE_01D_INTEGRATION.md).
 
 ## Stack and conventions
 

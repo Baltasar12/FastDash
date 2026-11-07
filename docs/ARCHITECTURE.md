@@ -1,6 +1,14 @@
 # Architecture
 
-SECTOR is a modular monolith. Next.js 16 App Router and React 19 render the shell and content on the server. Phase 00 is statically renderable and makes no external data requests at runtime.
+SECTOR is a modular monolith. Next.js 16 App Router and React 19 render the shell and content on the server. Phase 00 was statically renderable and made no external data requests at runtime.
+
+## Phase 01D integration
+
+The editorial `/` remains static. Explicit `/overview` and `/race-center` routes compose the existing feature exports with `src/data/providers/server.ts`, which exposes the server-only singleton Jolpica implementation of `F1DataProvider` v1. Search parameters select server-rendered datasets; native GET forms and links preserve shareable state. Route loading and error boundaries provide accessible feedback. Existing Calendar, Championship and Telemetry Lab placeholders remain under `[section]`.
+
+Provider wire validation, pagination, request budgets, cooldown, bounded caching and in-flight deduplication remain inside the adapter. No data-fetching client island, public API proxy, polling, database or fixture fallback is introduced. Process-local caching is adequate for this local candidate; a public multi-process deployment still requires coordinated quota planning. Playwright alone injects a synthetic wire transport into its isolated production-server child process; normal application startup has no test-data selector.
+
+The following sections retain the Foundation architecture context; the former future provider boundary is now implemented as described above.
 
 ## Structure
 

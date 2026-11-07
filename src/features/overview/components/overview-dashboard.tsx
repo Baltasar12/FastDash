@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { FieldValue } from "@/types/f1";
+import type { FieldValue, RaceResult } from "@/types/f1";
 import type { OverviewModel, RaceCenterContext } from "../types";
 import {
   dateText,
@@ -23,6 +23,18 @@ export interface OverviewDashboardProps {
 
 function defaultRaceCenterHref({ season, round }: RaceCenterContext): string {
   return `/race-center?season=${season}&round=${round}`;
+}
+
+/** Keep distinct historical entries for a driver separate in the preview. */
+function resultKey(row: RaceResult): string {
+  return JSON.stringify([
+    row.sessionId,
+    row.driver.driver.id,
+    row.constructor.status === "available"
+      ? row.constructor.value.id
+      : row.constructor.status,
+    row.driver.racingNumber,
+  ]);
 }
 
 function AsOfRound({ round }: { round: FieldValue<number> }) {
@@ -595,7 +607,7 @@ export function OverviewDashboard({
                 </thead>
                 <tbody>
                   {results.map((row) => (
-                    <tr key={row.driver.driver.id}>
+                    <tr key={resultKey(row)}>
                       <td className={styles.position}>
                         <span
                           className={styles.mobileCellLabel}

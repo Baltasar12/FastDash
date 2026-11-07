@@ -42,7 +42,7 @@ export const platformModules = [
 ] as const;
 
 export const navigation = [
-  { href: "/", label: "Overview" },
+  { href: "/overview", label: "Overview" },
   ...platformModules.map(({ slug, label }) => ({ href: `/${slug}`, label })),
 ];
 

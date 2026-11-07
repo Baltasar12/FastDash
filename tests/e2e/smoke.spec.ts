@@ -34,7 +34,7 @@ test("all navigation destinations work and show their current state", async ({
     ["Championship", "/championship"],
     ["Race Center", "/race-center"],
     ["Telemetry Lab", "/telemetry-lab"],
-    ["Overview", "/"],
+    ["Overview", "/overview"],
   ]) {
     if (testInfo.project.name === "mobile")
       await page.getByRole("button", { name: "Open navigation" }).click();
@@ -52,7 +52,10 @@ test("all navigation destinations work and show their current state", async ({
       })
       .click();
     await expect(page).toHaveURL(new RegExp(`${path}$`));
-    if (path !== "/") {
+    if (path === "/overview" || path === "/race-center") {
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      await expect(page).toHaveTitle(`${label} — SECTOR`);
+    } else if (path !== "/") {
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(
         `${label}.`,
       );

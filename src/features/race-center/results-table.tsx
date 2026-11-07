@@ -21,6 +21,18 @@ export type ResultsTableProps = (
   | { readonly kind: "qualifying"; readonly rows: readonly QualifyingResult[] }
 ) & { readonly eventName: string; readonly sessionName: string };
 
+/** A driver may have multiple historical entries in the same classification. */
+function resultKey(row: RaceResult | QualifyingResult): string {
+  return JSON.stringify([
+    row.sessionId,
+    row.driver.driver.id,
+    row.constructor.status === "available"
+      ? row.constructor.value.id
+      : row.constructor.status,
+    row.driver.racingNumber,
+  ]);
+}
+
 function constructorName(constructor: FieldValue<Constructor>): string {
   return fieldText(constructor, (value) => value.name);
 }
@@ -185,7 +197,7 @@ export function ResultsTable(props: ResultsTableProps) {
               ? props.rows
                   .filter((row) => rowMatches(row, search, constructor))
                   .map((row) => (
-                    <tr key={row.driver.driver.id}>
+                    <tr key={resultKey(row)}>
                       <td className={styles.position}>
                         {classificationText(row.classification)}
                       </td>
@@ -236,7 +248,7 @@ export function ResultsTable(props: ResultsTableProps) {
               : props.rows
                   .filter((row) => rowMatches(row, search, constructor))
                   .map((row) => (
-                    <tr key={row.driver.driver.id}>
+                    <tr key={resultKey(row)}>
                       <td className={styles.position}>
                         {classificationText(row.classification)}
                       </td>
