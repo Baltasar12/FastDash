@@ -751,9 +751,9 @@ describe("availability and HTTP failures", () => {
     ).toMatchObject({ status: "unavailable" });
   });
 
-  it("rejects invalid JSON safely and does not cache an operational failure", async () => {
+  it("suppresses invalid JSON failures briefly without treating them as cached data", async () => {
     let calls = 0;
-    const { provider, fetchMock } = harness(() =>
+    const { provider, fetchMock, advance } = harness(() =>
       ++calls === 1
         ? new Response("private-upstream-secret", {
             status: 200,
@@ -764,6 +764,11 @@ describe("availability and HTTP failures", () => {
     const first = await provider.getSupportedSeasons();
     expect(errorCode(first)).toBe("invalid-response");
     expect(JSON.stringify(first)).not.toContain("private-upstream-secret");
+    expect(errorCode(await provider.getSupportedSeasons())).toBe(
+      "invalid-response",
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    advance(5_000);
     success(await provider.getSupportedSeasons());
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
@@ -865,7 +870,7 @@ describe("availability and HTTP failures", () => {
     },
   );
 
-  it("bounds malformed Retry-After and avoids immediate rate-limit retries", async () => {
+  it("saturates enormous numeric Retry-After safely without retrying early", async () => {
     const { provider, fetchMock } = harness(
       () =>
         new Response("", {
@@ -877,9 +882,7 @@ describe("availability and HTTP failures", () => {
     const result = await provider.getSupportedSeasons();
     expect(errorCode(result)).toBe("rate-limited");
     if (result.status !== "error") throw new Error("Expected rate limit");
-    expect(Date.parse(result.error.retryAt ?? "") - NOW).toBeLessThanOrEqual(
-      24 * 60 * 60_000,
-    );
+    expect(Date.parse(result.error.retryAt ?? "")).toBe(8_640_000_000_000_000);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
