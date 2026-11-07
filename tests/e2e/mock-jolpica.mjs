@@ -3,6 +3,25 @@
  * normal `pnpm start` never loads it. Original synthetic wire records, no real data.
  * Intercept only Jolpica HTTPS. Never fall through to the public racing API.
  */
+if (process.env.SECTOR_E2E !== "1") {
+  throw new Error("The Jolpica test preload requires the isolated E2E server");
+}
+
+// Anchor wall time between the unpublished and upcoming fixture events, even
+// when the host runs in a future year. Keep real timers and elapsed time so
+// streaming, timeouts, provider TTLs and cooldowns retain their normal behavior.
+const SystemDate = globalThis.Date;
+const epoch = SystemDate.parse("2026-11-07T12:00:00.000Z");
+const started = performance.now();
+const now = () => epoch + Math.floor(performance.now() - started);
+globalThis.Date = new Proxy(SystemDate, {
+  apply: () => new SystemDate(now()).toString(),
+  construct: (target, args, newTarget) =>
+    Reflect.construct(target, args.length ? args : [now()], newTarget),
+  get: (target, property, receiver) =>
+    property === "now" ? now : Reflect.get(target, property, receiver),
+});
+
 const originalFetch = globalThis.fetch;
 const driver = {
   driverId: "wire_example",
