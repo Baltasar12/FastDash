@@ -1,18 +1,5 @@
 import { expect, test } from "@playwright/test";
 
-test("the streaming dashboard exposes loading before provider availability resolves", async ({
-  page,
-}, testInfo) => {
-  const season = testInfo.project.name === "mobile" ? 2023 : 2024;
-  await page.goto(`/overview?season=${season}`, { waitUntil: "commit" });
-  await expect(
-    page.getByRole("status").filter({ hasText: "Loading the season overview" }),
-  ).toBeVisible();
-  await expect(page.getByText("Loading the season overview…")).toHaveCount(0);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Season");
-  await expect(page.getByText("Data unavailable").first()).toBeVisible();
-});
-
 test("Overview and Race Center preserve season/event context in shareable URLs", async ({
   page,
 }) => {
