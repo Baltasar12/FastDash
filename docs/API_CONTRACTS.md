@@ -79,3 +79,7 @@ Future OpenF1 integration needs explicit identity mappings, coverage checks and 
 ## Contract compatibility
 
 The integration coordinator owns `src/types/**` and shared fixtures after Phase 00.6. Any semantic/shape change needs both consumer impact review and updated fixtures/tests before dependent work resumes. Breaking changes increment `F1_CONTRACT_VERSION` and the cache namespace; additive optional enrichment still requires coordinated review. Each independent session records the same validated contract commit, never just a version label or a moving branch name.
+
+## Phase 03A independent telemetry capability
+
+Shared telemetry uses TELEMETRY_CONTRACT_VERSION = 1 and a separate TelemetryProvider. F1DataProvider v1 is unchanged. See [TELEMETRY_CONTRACTS.md](TELEMETRY_CONTRACTS.md) and [TELEMETRY_HANDOFF.md](TELEMETRY_HANDOFF.md) for authoritative identity, units, bounded requests, missing-data, alignment, fixtures, quality, publication constraints and ownership policies. No real OpenF1 adapter or route is enabled in this phase.

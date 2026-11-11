@@ -1,0 +1,75 @@
+{
+  "id": "phase03a-candidate-2",
+  "base": "c886687a0070bfc9770f51464cde64b091291c01",
+  "head": "c886687a0070bfc9770f51464cde64b091291c01",
+  "branch": "codex/phase03-telemetry-contracts",
+  "worktree": "E:/CODIGO/FastDash-phase03-contracts",
+  "status": "frozen-uncommitted",
+  "files": [
+    {
+      "path": "docs/API_CONTRACTS.md",
+      "sha256": "5530eb71c6f9b8353d8e73b96fa0cc9ce769818d12ad31f4ca79b5898764df68",
+      "tracked": true
+    },
+    {
+      "path": "docs/TELEMETRY_CONTRACTS.md",
+      "sha256": "4929b9d46b2ad55fb988a08bb2625a55e39c9647c6dc23ef72bb7cc6f556661d",
+      "tracked": false
+    },
+    {
+      "path": "docs/TELEMETRY_HANDOFF.md",
+      "sha256": "191a94cd406bab9ad8b8af54e731255267ab3bd53128b63b2ead1c8f0f7721b5",
+      "tracked": false
+    },
+    {
+      "path": "docs/WORKSTREAMS.md",
+      "sha256": "75e0877fd270891f921defadd502dd9af3047fc026af0bc947cfe3c4d2845e76",
+      "tracked": true
+    },
+    {
+      "path": "src/data/fixtures/telemetry/fixture-provider.test.ts",
+      "sha256": "eed5470733740db994b53f5b6af00dd9a272f99218f866dab98e2b5aecb83c35",
+      "tracked": false
+    },
+    {
+      "path": "src/data/fixtures/telemetry/fixture-provider.ts",
+      "sha256": "c433860e26164b0b9e34b0508464375b9a1be16374e3b09189f93f14e5089026",
+      "tracked": false
+    },
+    {
+      "path": "src/data/fixtures/telemetry/fixtures.ts",
+      "sha256": "e372cfd7afd9e1cb3fa0f59c4109f47d583fcf6ce53c8d03df4addcdc1250954",
+      "tracked": false
+    },
+    {
+      "path": "src/data/fixtures/telemetry/README.md",
+      "sha256": "3f0947ad0941a87ae041c77959bdc6fffd346a1620f7e44d3e717c3d46b47d4a",
+      "tracked": false
+    },
+    {
+      "path": "src/types/telemetry-identifiers.ts",
+      "sha256": "53016d3e16504c719d262fa77a8472f6c4afbdc2e7575060b032c4ce3634bb6c",
+      "tracked": false
+    },
+    {
+      "path": "src/types/telemetry-provider.ts",
+      "sha256": "0c8901c1f6b5591f6cb852d3cbfa12a152d7f2f526517bbbb07d70ddd37545ce",
+      "tracked": false
+    },
+    {
+      "path": "src/types/telemetry-validation.ts",
+      "sha256": "b4c1d65a61b12291870b26e9119ebea5c4f8a1686c8671493061fb3f85be50d8",
+      "tracked": false
+    },
+    {
+      "path": "src/types/telemetry.test.ts",
+      "sha256": "2567006fa70d9fbca392c94cb536ac9a398fc13574bf602f3490d34431555a0f",
+      "tracked": false
+    },
+    {
+      "path": "src/types/telemetry.ts",
+      "sha256": "0680718ea18ce9e3542822aaa2d64ef58547f21a956f44bc5b27a45a9d652097",
+      "tracked": false
+    }
+  ]
+}
