@@ -22,6 +22,21 @@ globalThis.Date = new Proxy(SystemDate, {
     property === "now" ? now : Reflect.get(target, property, receiver),
 });
 
+// Only the isolated streaming child has this IPC gate. No timer decides when
+// its response resolves; the browser test must observe loading and release it.
+let releaseCalendar;
+const calendarGate =
+  process.env.SECTOR_E2E_STREAMING === "1"
+    ? new Promise((resolve) => {
+        releaseCalendar = resolve;
+      })
+    : undefined;
+if (calendarGate) {
+  process.on("message", (message) => {
+    if (message === "release-calendar") releaseCalendar();
+  });
+}
+
 const originalFetch = globalThis.fetch;
 const driver = {
   driverId: "wire_example",
@@ -95,7 +110,11 @@ globalThis.fetch = async function testOnlyJolpicaFetch(input, init) {
   if (season === "2025") throw new Error("Deterministic test network failure");
   if (season === "2024" || season === "2023") {
     if (path.endsWith("/races/")) {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      if (calendarGate) {
+        process.send?.("calendar-blocked");
+        await calendarGate;
+        init?.signal?.throwIfAborted();
+      }
       return Response.json(envelope({ RaceTable: { season, Races: [] } }, 0));
     }
     if (

@@ -16,6 +16,7 @@ import {
 } from "@/data/fixtures/results";
 import { createOverviewDemoProvider, OVERVIEW_DEMO_NOW } from "../data/demo";
 import type { DataSource } from "@/types/f1-provider";
+import type { OverviewModel } from "../types";
 import { queryOverview } from "../query";
 import { OverviewDashboard } from "./overview-dashboard";
 import { OverviewLoading } from "./overview-loading";
@@ -224,6 +225,38 @@ describe("Overview dashboard", () => {
     expect(form).toHaveAttribute("action", "/overview");
     expect(screen.getByRole("button", { name: "View season" })).toBeEnabled();
   });
+
+  it.each(["error", "unavailable", "empty"] as const)(
+    "disables season controls when supported seasons are %s",
+    async (status) => {
+      const model = await fixtureModel();
+      const seasons: OverviewModel["seasons"] =
+        status === "error"
+          ? {
+              status,
+              error: sampleErrors.network,
+              metadata: {
+                source: sampleSource,
+                attemptedAt: sampleMetadata.retrievedAt,
+              },
+            }
+          : status === "empty"
+            ? { status, reason: "no-entries", metadata: sampleMetadata }
+            : { status, reason: "not-covered", metadata: sampleMetadata };
+      render(<OverviewDashboard model={{ ...model, seasons }} />);
+      const form = screen.getByRole("form", { name: "Choose overview season" });
+      const selector = within(form).getByRole("combobox", { name: "Season" });
+      expect(selector).toBeDisabled();
+      expect(
+        within(form).getByRole("button", { name: "View season" }),
+      ).toBeDisabled();
+      expect(
+        within(selector).getByRole("option", { name: "No seasons available" }),
+      ).toBeInTheDocument();
+      selector.focus();
+      expect(selector).not.toHaveFocus();
+    },
+  );
 
   it("shows the actual supplied scheduled sessions and injects contextual Race Center links", async () => {
     const model = await queryOverview(createOverviewDemoProvider(), {
